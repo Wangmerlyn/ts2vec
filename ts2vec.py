@@ -100,7 +100,9 @@ class TS2Vec:
 
         train_data = train_data[~np.isnan(train_data).all(axis=2).all(axis=1)]
 
-        train_dataset = TensorDataset(torch.from_numpy(train_data).to(torch.float))
+        train_dataset = TensorDataset(
+            torch.from_numpy(train_data).to(torch.float)
+        )
         train_loader = DataLoader(
             train_dataset,
             batch_size=min(self.batch_size, len(train_dataset)),
@@ -133,7 +135,9 @@ class TS2Vec:
                     window_offset = np.random.randint(
                         x.size(1) - self.max_train_length + 1
                     )
-                    x = x[:, window_offset : window_offset + self.max_train_length]
+                    x = x[
+                        :, window_offset : window_offset + self.max_train_length
+                    ]
                 x = x.to(self.device)
 
                 ts_l = x.size(1)
@@ -151,12 +155,16 @@ class TS2Vec:
                 optimizer.zero_grad()
 
                 out1 = self._net(
-                    take_per_row(x, crop_offset + crop_eleft, crop_right - crop_eleft)
+                    take_per_row(
+                        x, crop_offset + crop_eleft, crop_right - crop_eleft
+                    )
                 )
                 out1 = out1[:, -crop_l:]
 
                 out2 = self._net(
-                    take_per_row(x, crop_offset + crop_left, crop_eright - crop_left)
+                    take_per_row(
+                        x, crop_offset + crop_left, crop_eright - crop_left
+                    )
                 )
                 out2 = out2[:, :crop_l]
 
@@ -190,7 +198,9 @@ class TS2Vec:
 
         return loss_log
 
-    def _eval_with_pooling(self, x, mask=None, slicing=None, encoding_window=None):
+    def _eval_with_pooling(
+        self, x, mask=None, slicing=None, encoding_window=None
+    ):
         out = self.net(x.to(self.device, non_blocking=True), mask)
         if encoding_window == "full_series":
             if slicing is not None:
@@ -281,7 +291,11 @@ class TS2Vec:
                         calc_buffer_l = 0
                     for i in range(0, ts_l, sliding_length):
                         l = i - sliding_padding
-                        r = i + sliding_length + (sliding_padding if not causal else 0)
+                        r = (
+                            i
+                            + sliding_length
+                            + (sliding_padding if not causal else 0)
+                        )
                         x_sliding = torch_pad_nan(
                             x[:, max(l, 0) : min(r, ts_l)],
                             left=-l if l < 0 else 0,
@@ -309,7 +323,8 @@ class TS2Vec:
                                 x_sliding,
                                 mask,
                                 slicing=slice(
-                                    sliding_padding, sliding_padding + sliding_length
+                                    sliding_padding,
+                                    sliding_padding + sliding_length,
                                 ),
                                 encoding_window=encoding_window,
                             )
@@ -321,7 +336,8 @@ class TS2Vec:
                                 torch.cat(calc_buffer, dim=0),
                                 mask,
                                 slicing=slice(
-                                    sliding_padding, sliding_padding + sliding_length
+                                    sliding_padding,
+                                    sliding_padding + sliding_length,
                                 ),
                                 encoding_window=encoding_window,
                             )
@@ -395,7 +411,11 @@ class TS2Vec:
                     calc_buffer_l = 0
                 for i in range(0, ts_l, sliding_length):
                     l = i - sliding_padding
-                    r = i + sliding_length + (sliding_padding if not causal else 0)
+                    r = (
+                        i
+                        + sliding_length
+                        + (sliding_padding if not causal else 0)
+                    )
                     x_sliding = torch_pad_nan(
                         x[:, max(l, 0) : min(r, ts_l)],
                         left=-l if l < 0 else 0,
@@ -408,7 +428,8 @@ class TS2Vec:
                                 torch.cat(calc_buffer, dim=0),
                                 mask,
                                 slicing=slice(
-                                    sliding_padding, sliding_padding + sliding_length
+                                    sliding_padding,
+                                    sliding_padding + sliding_length,
                                 ),
                                 encoding_window=encoding_window,
                             )
@@ -422,7 +443,8 @@ class TS2Vec:
                             x_sliding,
                             mask,
                             slicing=slice(
-                                sliding_padding, sliding_padding + sliding_length
+                                sliding_padding,
+                                sliding_padding + sliding_length,
                             ),
                             encoding_window=encoding_window,
                         )
@@ -434,7 +456,8 @@ class TS2Vec:
                             torch.cat(calc_buffer, dim=0),
                             mask,
                             slicing=slice(
-                                sliding_padding, sliding_padding + sliding_length
+                                sliding_padding,
+                                sliding_padding + sliding_length,
                             ),
                             encoding_window=encoding_window,
                         )
@@ -449,7 +472,9 @@ class TS2Vec:
                         kernel_size=out.size(1),
                     ).squeeze(1)
             else:
-                out = self._eval_with_pooling(x, mask, encoding_window=encoding_window)
+                out = self._eval_with_pooling(
+                    x, mask, encoding_window=encoding_window
+                )
                 if encoding_window == "full_series":
                     out = out.squeeze(1)
 
