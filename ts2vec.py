@@ -2,9 +2,9 @@ import torch
 import torch.nn.functional as F
 from torch.utils.data import TensorDataset, DataLoader
 import numpy as np
-from models import TSEncoder
-from models.losses import hierarchical_contrastive_loss
-from misc import (
+from .models import TSEncoder
+from .models.losses import hierarchical_contrastive_loss
+from .misc import (
     take_per_row,
     split_with_nan,
     centerize_vary_length_series,
